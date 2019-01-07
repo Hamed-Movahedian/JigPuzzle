@@ -34,6 +34,14 @@ Material:
         m_Texture: {fileID: 2800000, guid: 48738d88586b29a4992fe67cbed8055e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - Texture2D_9BAF57B1:
+        m_Texture: {fileID: 2800000, guid: 48738d88586b29a4992fe67cbed8055e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_DA20944D:
+        m_Texture: {fileID: 2800000, guid: 797b79fe6e64d454d817ff8a626ff71d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
