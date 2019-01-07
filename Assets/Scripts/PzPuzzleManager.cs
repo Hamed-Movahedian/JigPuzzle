@@ -17,6 +17,9 @@ public class PzPuzzleManager : MonoBehaviour
         {new Vector2(0,1),2 },
         {new Vector2(1,1),3 },
     };
+
+    public float snapDistance;
+
     private void Awake()
     {
         instance = this;
