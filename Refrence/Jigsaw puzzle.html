@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <meta charset="UTF-8">
+   <title>Jigsaw puzzle</title>
+   <script type="text/javascript">
+      function save(filename, data)
+      {
+         var blob = new Blob([data], {type: "text/csv"});
+         if (window.navigator.msSaveOrOpenBlob)
+         {
+            window.navigator.msSaveBlob(blob, filename);
+         }
+         else
+         {
+            var elem = window.document.createElement('a');
+            elem.href = window.URL.createObjectURL(blob);
+            elem.download = filename;        
+            document.body.appendChild(elem);
+            elem.click();        
+            document.body.removeChild(elem);
+         }
+      }
+   
+      var seed = 1;
+      function random() { var x = Math.sin(seed) * 10000; seed += 1; return x - Math.floor(x); }
+      function uniform(min, max) { var r = random(); return min + r * (max - min); }
+      function rbool() { return random() > 0.5; }
+      
+      function $(id) { return document.getElementById(id); }
+
+      function updateseed()     { $("_seed").value =    $("seed").value;          update(); }
+      function updatetabsize()  { $("_tabsize").value = $("tabsize").value + "%"; update(); }
+      function updatejitter()   { $("_jitter").value =  $("jitter").value + "%";  update(); }
+      function update_seed()    { var val = parseFloat($("_seed").value);    if (!isNaN(val)) { $("seed").value = val; }    updateseed(); }
+      function update_tabsize() { var val = parseFloat($("_tabsize").value); if (!isNaN(val)) { $("tabsize").value = val; } updatetabsize(); }
+      function update_jitter()  { var val = parseFloat($("_jitter").value);  if (!isNaN(val)) { $("jitter").value = val; }  updatejitter(); }
+      
+      var a, b, c, d, e, t, j, flip, xi, yi, xn, yn, vertical, offset, width, heigth;
+      function first() { e = uniform(-j, j); next();}
+      function next()  { var flipold = flip; flip = rbool(); a = (flip == flipold ? -e: e); b = uniform(-j, j); c = uniform(-j, j); d = uniform(-j, j); e = uniform(-j, j);}
+      function sl()  { return vertical ? height / yn : width / xn; }
+      function sw()  { return vertical ? width / xn : height / yn;}
+      function ol()  { return offset + sl() * (vertical ? yi : xi); }
+      function ow()  { return offset + sw() * (vertical ? xi : yi); }
+      function l(v)  { var ret = ol() + sl() * v; return Math.round(ret * 100) / 100; }
+      function w(v)  { var ret = ow() + sw() * v * (flip ? -1.0 : 1.0); return Math.round(ret * 100) / 100; }
+      function p0l() { return l(0.0); }
+      function p0w() { return w(0.0); }
+      function p1l() { return l(0.2); }
+      function p1w() { return w(a); }
+      function p2l() { return l(0.5 + b + d); }
+      function p2w() { return w(-t + c); }
+      function p3l() { return l(0.5 - t + b); }
+      function p3w() { return w(t + c); }
+      function p4l() { return l(0.5 - 2.0 * t + b - d); }
+      function p4w() { return w(3.0 * t + c); }
+      function p5l() { return l(0.5 + 2.0 * t + b - d); }
+      function p5w() { return w(3.0 * t + c); }
+      function p6l() { return l(0.5 + t + b); }
+      function p6w() { return w(t + c); }
+      function p7l() { return l(0.5 + b + d); }
+      function p7w() { return w(-t + c); }
+      function p8l() { return l(0.8); }
+      function p8w() { return w(e); }
+      function p9l() { return l(1.0); }
+      function p9w() { return w(0.0); }
+
+      function gen_d()
+      {
+         var str = "";
+         
+         seed = parseInt($("seed").value);
+         t = parseFloat($("tabsize").value) / 200.0;
+         j = parseFloat($("jitter").value) / 100.0;
+         xn = parseInt($("xn").value);
+         yn = parseInt($("yn").value);
+         
+         vertical = 0;
+         for (yi = 1; yi < yn; ++yi)
+         {
+            xi = 0;
+            first();
+            str += "M" + p0l() + "," + p0w() + " ";
+            for (; xi < xn; ++xi)
+            {
+               str += "C" + p1l() + "," + p1w() + " " + p2l() + "," + p2w() + " " + p3l() + "," + p3w() + " ";
+               str += "C" + p4l() + "," + p4w() + " " + p5l() + "," + p5w() + " " + p6l() + "," + p6w() + " ";
+               str += "C" + p7l() + "," + p7w() + " " + p8l() + "," + p8w() + " " + p9l() + "," + p9w() + " ";
+               next();
+            }
+         }
+         
+         vertical = 1;
+         for (xi = 1; xi < xn; ++xi)
+         {
+            yi = 0;
+            first();
+            str += "M" + p0w() + "," + p0l() + " ";
+            for (; yi < yn; ++yi)
+            {
+               str += "C" + p1w() + "," + p1l() + " " + p2w() + "," + p2l() + " " + p3w() + "," + p3l() + " ";
+               str += "C" + p4w() + "," + p4l() + " " + p5w() + "," + p5l() + " " + p6w() + "," + p6l() + " ";
+               str += "C" + p7w() + "," + p7l() + " " + p8w() + "," + p8l() + " " + p9w() + "," + p9l() + " ";
+               next();
+            }
+         }
+         
+         str += "M" + offset + "," + offset + " "
+         str += "L" + (offset + width) + "," + offset + " "
+         str += "L" + (offset + width) + "," + (offset + height) + " "
+         str += "L" + offset + "," + (offset + height) + " "
+         str += "L" + offset + "," + offset + " ";
+
+         return str;
+      }
+      
+      function update()
+      {
+         width = parseInt($("width").value);
+         height = parseInt($("height").value);
+         var ratio = 1.0 * width / height;
+         if (ratio > 1.5)
+         {
+            width = 900;
+            height = width / ratio;
+         }
+         else
+         {
+            height = 600;
+            width = height * ratio;
+         }
+         $("puzzlecontainer").setAttribute("width", width + 11);
+         $("puzzlecontainer").setAttribute("height", height + 11);
+         offset = 5.5;
+         $("puzzlepath").setAttribute("d", gen_d());
+      }
+      
+      function generate()
+      {
+         width = parseInt($("width").value);
+         height = parseInt($("height").value);
+         offset = 0.0;
+
+         var data = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" ";
+         data += "width=\"" + width + "mm\" height=\"" + height + "mm\" viewBox=\"0 0 " + width + " " + height + "\">";
+         data += "<path fill=\"none\" stroke=\"black\" stroke-width=\"0.1\" d=\"";
+         data += gen_d();
+         data += "\"></path></svg>";
+         
+         save("jigsaw.svg", data);
+      }
+   </script>
+</head>
+
+<body onload="$('seed').value = Math.random() * 10000; updateseed();">
+   <table>
+      <tbody><tr>
+         <td>Seed:</td>
+         <td><input id="_seed" type="text" value="5769" onchange="update_seed()"></td>
+         <td><input id="seed" type="range" value="5769" min="0" max="9999" step="1" onchange="updateseed()"></td>
+      </tr>
+      <tr>
+         <td>Tab Size:</td>
+         <td><input id="_tabsize" type="text" value="25.5%" onchange="update_tabsize()"></td>
+         <td><input id="tabsize" type="range" value="25.5" min="10" max="30" step="0.1" onchange="updatetabsize()"></td>
+      </tr>
+      <tr>
+         <td>Jitter:</td>
+         <td><input id="_jitter" type="text" value="4%" onchange="update_jitter()"></td>
+         <td><input id="jitter" type="range" value="4" min="0" max="13" step="0.1" onchange="updatejitter()"></td>
+      </tr>
+      <tr>
+         <td>Tiles:</td>
+         <td><input id="xn" type="text" value="4" size="4" onchange="update()"> x <input id="yn" type="text" value="3" size="4" onchange="update()"></td>
+         <td></td>
+      </tr>
+      <tr>
+         <td>Size:</td>
+         <td><input id="width" type="text" value="300" size="4" onchange="update()"> x <input id="height" type="text" value="200" size="4" onchange="update()"> mm</td>
+         <td><button onclick="generate()">Download SVG</button></td>
+      </tr>
+   </tbody></table>
+   <svg id="puzzlecontainer" width="911" height="611"><path id="puzzlepath" fill="none" stroke="black" d="M5.5,205.5 C50.5,211.04 114.22,233.9 81.74,182.9 C49.26,131.9 164.01,131.9 139.11,182.9 C114.22,233.9 185.5,211 230.5,205.5 C275.5,200 329.26,181.84 305.42,232.84 C281.59,283.84 396.34,283.84 362.8,232.84 C329.26,181.84 410.5,199.5 455.5,205.5 C500.5,211.5 562.1,226.89 540.38,175.89 C518.67,124.89 633.42,124.89 597.76,175.89 C562.1,226.89 635.5,210.15 680.5,205.5 C725.5,200.85 808.87,180.92 771.28,231.92 C733.68,282.92 848.43,282.92 828.65,231.92 C808.87,180.92 860.5,207.77 905.5,205.5 M5.5,405.5 C50.5,409.99 117.4,432.73 89.83,381.73 C62.27,330.73 177.02,330.73 147.21,381.73 C117.4,432.73 185.5,412.89 230.5,405.5 C275.5,398.11 354.42,428.07 322.42,377.07 C290.42,326.07 405.17,326.07 379.8,377.07 C354.42,428.07 410.5,407.17 455.5,405.5 C500.5,403.83 567.18,372.55 537.88,423.55 C508.57,474.55 623.32,474.55 595.25,423.55 C567.18,372.55 635.5,400.22 680.5,405.5 C725.5,410.78 786.92,438.31 767.05,387.31 C747.18,336.31 861.93,336.31 824.43,387.31 C786.92,438.31 860.5,399.38 905.5,405.5 M230.5,5.5 C225.45,45.5 210.57,114.12 267.94,85.2 C325.32,56.27 325.32,158.27 267.94,136.2 C210.57,114.12 223.22,165.5 230.5,205.5 C237.78,245.5 260.35,301.29 202.97,274.04 C145.6,246.8 145.6,348.8 202.97,325.04 C260.35,301.29 235.5,365.5 230.5,405.5 C225.5,445.5 250.5,500.45 193.12,474.44 C135.75,448.44 135.75,550.44 193.12,525.44 C250.5,500.45 231.77,565.5 230.5,605.5 M455.5,5.5 C455.62,45.5 429.54,103.84 486.92,75.26 C544.29,46.68 544.29,148.68 486.92,126.26 C429.54,103.84 451.11,165.5 455.5,205.5 C459.89,245.5 492.86,318.27 435.49,285.65 C378.11,253.03 378.11,355.03 435.49,336.65 C492.86,318.27 461.12,365.5 455.5,405.5 C449.88,445.5 427.56,505.87 484.93,483.03 C542.31,460.2 542.31,562.2 484.93,534.03 C427.56,505.87 450.26,565.5 455.5,605.5 M680.5,5.5 C685.79,45.5 701.8,110.95 644.43,83 C587.05,55.04 587.05,157.04 644.43,134 C701.8,110.95 689.38,165.5 680.5,205.5 C671.62,245.5 646.56,296.21 703.93,276.98 C761.31,257.76 761.31,359.76 703.93,327.98 C646.56,296.21 679.41,365.5 680.5,405.5 C681.59,445.5 701.07,495.72 643.69,476.03 C586.32,456.34 586.32,558.34 643.69,527.03 C701.07,495.72 682.19,565.5 680.5,605.5 M5.5,5.5 L905.5,5.5 L905.5,605.5 L5.5,605.5 L5.5,5.5 "></path></svg>
+
+
+ </body></html>
