@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,7 +13,7 @@ public class PZBoard : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //setup();
+        setup();
     }
     [ContextMenu("Setup")]
     private void setup()
@@ -30,7 +30,8 @@ public class PZBoard : MonoBehaviour
         for (int x = 0; x < size.x; x++)
             for (int y = 0; y < size.y; y++)
             {
-                var piece = (PzPiece)PrefabUtility.InstantiatePrefab(picePrefab);
+                //var piece = (PzPiece)PrefabUtility.InstantiatePrefab(picePrefab);
+                var piece = (PzPiece)Instantiate(picePrefab);
                 piece.location = new Vector2(x, y);
                 piece.transform.SetParent(transform);
                 piece.Setup();
@@ -51,7 +52,7 @@ public class PZBoard : MonoBehaviour
             {
                 pieceMat[x, y].transform.localPosition=new Vector3(
                     Random.Range(-0.5f,1f),
-                    Random.Range(-0.5f,1f),0);
+                    Random.Range(-0.5f,.5f),0);
                 
             }
 
